@@ -18,7 +18,6 @@ package com.example.android.pets.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import com.example.android.pets.data.PetContract.PetEntry;
 
 /**
@@ -51,12 +50,15 @@ public class PetDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         // Create a String that contains the SQL statement to create the pets table
-        String SQL_CREATE_PETS_TABLE =  "CREATE TABLE " + PetEntry.TABLE_NAME + " ("
-                + PetEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + PetEntry.COLUMN_PET_NAME + " TEXT NOT NULL, "
-                + PetEntry.COLUMN_PET_BREED + " TEXT, "
-                + PetEntry.COLUMN_PET_GENDER + " INTEGER NOT NULL, "
-                + PetEntry.COLUMN_PET_WEIGHT + " INTEGER NOT NULL DEFAULT 0);";
+        String SQL_CREATE_PETS_TABLE =
+                "CREATE TABLE " + PetEntry.TABLE_NAME +
+                "(" +
+                PetEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                PetEntry.COLUMN_PET_NAME + " TEXT NOT NULL, " +
+                PetEntry.COLUMN_PET_BREED + " TEXT, " +
+                PetEntry.COLUMN_PET_GENDER + " INTEGER NOT NULL, " +
+                PetEntry.COLUMN_PET_WEIGHT + " INTEGER NOT NULL DEFAULT 0" +
+                ")";
 
         // Execute the SQL statement
         db.execSQL(SQL_CREATE_PETS_TABLE);

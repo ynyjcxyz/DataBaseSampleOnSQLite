@@ -15,28 +15,33 @@
  */
 package com.example.android.pets;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
-
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import com.example.android.pets.data.PetContract;
 import com.example.android.pets.data.PetContract.PetEntry;
 import com.example.android.pets.data.PetDbHelper;
+import com.example.android.pets.data.PetProvider;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 /**
  * Displays list of pets that were entered and stored in the app.
  */
 public class CatalogActivity extends AppCompatActivity {
 
-    /** Database helper that will provide us access to the database */
-    private PetDbHelper mDbHelper;
+    /**
+     * Database helper that will provide us access to the database
+     */
+//    private PetDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,18 +49,15 @@ public class CatalogActivity extends AppCompatActivity {
         setContentView(R.layout.activity_catalog);
 
         // Setup FAB to open EditorActivity
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
-                startActivity(intent);
-            }
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(view -> {
+            Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+            startActivity(intent);
         });
 
         // To access our database, we instantiate our subclass of SQLiteOpenHelper
         // and pass the context, which is the current activity.
-        mDbHelper = new PetDbHelper(this);
+//        mDbHelper = new PetDbHelper(this);
     }
 
     @Override
@@ -68,9 +70,9 @@ public class CatalogActivity extends AppCompatActivity {
      * Temporary helper method to display information in the onscreen TextView about the state of
      * the pets database.
      */
+
     private void displayDatabaseInfo() {
         // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
@@ -79,20 +81,26 @@ public class CatalogActivity extends AppCompatActivity {
                 PetEntry.COLUMN_PET_NAME,
                 PetEntry.COLUMN_PET_BREED,
                 PetEntry.COLUMN_PET_GENDER,
-                PetEntry.COLUMN_PET_WEIGHT };
+                PetEntry.COLUMN_PET_WEIGHT
+        };
 
         // Perform a query on the pets table
-        Cursor cursor = db.query(
-                PetEntry.TABLE_NAME,   // The table to query
-                projection,            // The columns to return
-                null,                  // The columns for the WHERE clause
-                null,                  // The values for the WHERE clause
-                null,                  // Don't group the rows
-                null,                  // Don't filter by row groups
-                null);                   // The sort order
+        // The table to query
+        // The columns to return
+        // The columns for the WHERE clause
+        // The values for the WHERE clause
+        // Don't group the rows
+        // Don't filter by row groups
+        // The sort order
 
-        TextView displayView = (TextView) findViewById(R.id.text_view_pet);
+        Cursor cursor = getContentResolver().query(
+                PetContract.PetEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null);
 
+        TextView displayView = findViewById(R.id.text_view_pet);
         try {
             // Create a header in the Text View that looks like this:
             //
@@ -109,33 +117,28 @@ public class CatalogActivity extends AppCompatActivity {
                     PetEntry.COLUMN_PET_WEIGHT + "\n");
 
             // Figure out the index of each column
-            int idColumnIndex = cursor.getColumnIndex(PetEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
-            int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
-            int genderColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
-            int weightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
 
             // Iterate through all the returned rows in the cursor
             while (cursor.moveToNext()) {
                 // Use that index to extract the String or Int value of the word
                 // at the current row the cursor is on.
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                String currentBreed = cursor.getString(breedColumnIndex);
-                int currentGender = cursor.getInt(genderColumnIndex);
-                int currentWeight = cursor.getInt(weightColumnIndex);
                 // Display the values from each column of the current row in the cursor in the TextView
-                displayView.append(("\n" + currentID + " - " +
-                        currentName + " - " +
-                        currentBreed + " - " +
-                        currentGender + " - " +
-                        currentWeight));
+                displayView.append(("\n" +
+                        cursor.getInt(cursor.getColumnIndex(PetEntry._ID))
+                        + " - " +
+                        cursor.getString(cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME))
+                        + " - " +
+                        cursor.getString(cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED))
+                        + " - " +
+                        cursor.getInt(cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER))
+                        + " - " +
+                        cursor.getInt(cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT))));
             }
         } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
             cursor.close();
         }
+        // Always close the cursor when you're done reading from it. This releases all its
+        // resources and makes it invalid.
     }
 
     /**
@@ -143,15 +146,17 @@ public class CatalogActivity extends AppCompatActivity {
      */
     private void insertPet() {
         // Gets the database in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+//        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         // Create a ContentValues object where column names are the keys,
         // and Toto's pet attributes are the values.
-        ContentValues values = new ContentValues();
-        values.put(PetEntry.COLUMN_PET_NAME, "Toto");
-        values.put(PetEntry.COLUMN_PET_BREED, "Terrier");
-        values.put(PetEntry.COLUMN_PET_GENDER, PetEntry.GENDER_MALE);
-        values.put(PetEntry.COLUMN_PET_WEIGHT, 7);
+        ContentValues insertValues = new ContentValues();
+        insertValues.put(PetEntry.COLUMN_PET_NAME, "Toto_1");
+        insertValues.put(PetEntry.COLUMN_PET_BREED, "Terrier_MIX");
+        insertValues.put(PetEntry.COLUMN_PET_GENDER, PetEntry.GENDER_MALE);
+        insertValues.put(PetEntry.COLUMN_PET_WEIGHT, 8);
+
+        Uri insertUri = getContentResolver().insert(PetEntry.CONTENT_URI,insertValues);
 
         // Insert a new row for Toto in the database, returning the ID of that new row.
         // The first argument for db.insert() is the pets table name.
@@ -160,7 +165,15 @@ public class CatalogActivity extends AppCompatActivity {
         // this is set to "null", then the framework will not insert a row when
         // there are no values).
         // The third argument is the ContentValues object containing the info for Toto.
-        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
+
+//        long newRowId = db.insert(PetEntry.TABLE_NAME, null, insertValues);
+//        Toast.makeText(this, "newRowId = " + newRowId, Toast.LENGTH_SHORT).show();
+//        System.out.println("newRowId = " + newRowId);
+    }
+
+    private void deleteTables() {
+        //clear current table,caution!
+//        mDbHelper.getWritableDatabase().execSQL("delete from " + PetEntry.TABLE_NAME);
     }
 
     @Override
@@ -182,7 +195,8 @@ public class CatalogActivity extends AppCompatActivity {
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+//                deleteTables();
+//                displayDatabaseInfo();
                 return true;
         }
         return super.onOptionsItemSelected(item);

@@ -15,12 +15,15 @@
  */
 package com.example.android.pets;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
+import androidx.appcompat.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,25 +32,34 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import com.example.android.pets.data.PetContract.PetEntry;
-import com.example.android.pets.data.PetDbHelper;
 
 /**
  * Allows user to create a new pet or edit an existing one.
  */
 public class EditorActivity extends AppCompatActivity {
+    private boolean sign1;
+    private boolean sign2;
+    private boolean sign3;
 
-    /** EditText field to enter the pet's name */
+    /**
+     * EditText field to enter the pet's name
+     */
     private EditText mNameEditText;
 
-    /** EditText field to enter the pet's breed */
+    /**
+     * EditText field to enter the pet's breed
+     */
     private EditText mBreedEditText;
 
-    /** EditText field to enter the pet's weight */
+    /**
+     * EditText field to enter the pet's weight
+     */
     private EditText mWeightEditText;
 
-    /** EditText field to enter the pet's gender */
+    /**
+     * EditText field to enter the pet's gender
+     */
     private Spinner mGenderSpinner;
 
     /**
@@ -57,18 +69,23 @@ public class EditorActivity extends AppCompatActivity {
      */
     private int mGender = PetEntry.GENDER_UNKNOWN;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
         // Find all relevant views that we will need to read user input from
-        mNameEditText = (EditText) findViewById(R.id.edit_pet_name);
-        mBreedEditText = (EditText) findViewById(R.id.edit_pet_breed);
-        mWeightEditText = (EditText) findViewById(R.id.edit_pet_weight);
-        mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
+        mNameEditText = findViewById(R.id.edit_pet_name);
+        mBreedEditText = findViewById(R.id.edit_pet_breed);
+        mWeightEditText = findViewById(R.id.edit_pet_weight);
+        mGenderSpinner = findViewById(R.id.spinner_gender);
 
-        setupSpinner();
+        mNameEditText.addTextChangedListener(new TextChange());
+        mBreedEditText.addTextChangedListener(new TextChange());
+        mWeightEditText.addTextChangedListener(new TextChange());
+
+        setupSpinner();//set spinner option
     }
 
     /**
@@ -77,7 +94,7 @@ public class EditorActivity extends AppCompatActivity {
     private void setupSpinner() {
         // Create adapter for spinner. The list options are from the String array it will use
         // the spinner will use the default layout
-        ArrayAdapter genderSpinnerAdapter = ArrayAdapter.createFromResource(this,
+        ArrayAdapter<CharSequence> genderSpinnerAdapter = ArrayAdapter.createFromResource(this,
                 R.array.array_gender_options, android.R.layout.simple_spinner_item);
 
         // Specify dropdown layout style - simple list view with 1 item per line
@@ -122,10 +139,9 @@ public class EditorActivity extends AppCompatActivity {
         int weight = Integer.parseInt(weightString);
 
         // Create database helper
-        PetDbHelper mDbHelper = new PetDbHelper(this);
-
+        //PetDbHelper petDbHelper = new PetDbHelper(this);
         // Gets the database in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+//        SQLiteDatabase db = new PetDbHelper(this).getWritableDatabase();
 
         // Create a ContentValues object where column names are the keys,
         // and pet attributes from the editor are the values.
@@ -136,15 +152,25 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetEntry.COLUMN_PET_WEIGHT, weight);
 
         // Insert a new row for pet in the database, returning the ID of that new row.
-        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
+//        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
 
         // Show a toast message depending on whether or not the insertion was successful
-        if (newRowId == -1) {
+/*        if (newRowId == -1) {
             // If the row ID is -1, then there was an error with insertion.
             Toast.makeText(this, "Error with saving pet", Toast.LENGTH_SHORT).show();
         } else {
             // Otherwise, the insertion was successful and we can display a toast with the row ID.
             Toast.makeText(this, "Pet saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
+        }*/
+        Uri insertUri = getContentResolver().insert(PetEntry.CONTENT_URI,values);
+        if(insertUri == null){
+            Toast.makeText(this,
+                    getString(R.string.editor_insert_pet_failed),
+                    Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this,
+                    getString(R.string.editor_insert_pet_successful),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -156,22 +182,59 @@ public class EditorActivity extends AppCompatActivity {
         return true;
     }
 
+    class TextChange implements TextWatcher {
+        @Override
+        public void afterTextChanged(Editable arg0) {
+            sign1 = mNameEditText.getText().length() > 0;
+            sign2 = mBreedEditText.getText().length() > 0;
+            sign3 = mWeightEditText.getText().length() > 0;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+                                      int arg3) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence cs, int start, int before,
+                                  int count) {
+            sign1 = mNameEditText.getText().length() > 0;
+            sign2 = mBreedEditText.getText().length() > 0;
+            sign3 = mWeightEditText.getText().length() > 0;
+        }
+    }
+
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                // Save pet to database
-                insertPet();
-                // Exit activity
-                finish();
-                return true;
-            // Respond to a click on the "Delete" menu option
+                if (sign1 & sign2 & sign3) {
+                    // Save pet to database
+                    insertPet();
+                    // Exit activity
+                    finish();
+                    return true;
+                } else {
+                    Toast.makeText(this, "Please input something!", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                // Do nothing for now
-                return true;
-            // Respond to a click on the "Up" arrow button in the app bar
+                if (sign1 & sign2 & sign3) {
+                    mNameEditText.setText(null);
+                    mBreedEditText.setText(null);
+                    mWeightEditText.setText(null);
+                    mGenderSpinner.setSelection(0);
+                    return true;
+                } else {
+                    Toast.makeText(this, "Please input something!", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
                 // Navigate back to parent activity (CatalogActivity)
                 NavUtils.navigateUpFromSameTask(this);

@@ -37,21 +37,24 @@
             android:layout_width="0dp"
             android:layout_weight="2"
             android:paddingLeft="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            tools:ignore="RtlHardcoded,RtlSymmetry">
 
             <!-- Name field -->
             <EditText
                 android:id="@+id/edit_pet_name"
                 android:hint="@string/hint_pet_name"
                 android:inputType="textCapWords"
-                style="@style/EditorFieldStyle" />
+                style="@style/EditorFieldStyle"
+                tools:ignore="Autofill" />
 
             <!-- Breed field -->
             <EditText
                 android:id="@+id/edit_pet_breed"
                 android:hint="@string/hint_pet_breed"
                 android:inputType="textCapWords"
-                style="@style/EditorFieldStyle" />
+                style="@style/EditorFieldStyle"
+                tools:ignore="Autofill" />
         </LinearLayout>
     </LinearLayout>
 
@@ -80,7 +83,9 @@
                 android:layout_height="48dp"
                 android:layout_width="wrap_content"
                 android:paddingRight="16dp"
-                android:spinnerMode="dropdown"/>
+                android:spinnerMode="dropdown"
+                android:paddingEnd="16dp"
+                tools:ignore="RtlSymmetry" />
         </LinearLayout>
     </LinearLayout>
 
@@ -101,14 +106,17 @@
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="2"
-            android:paddingLeft="4dp">
+            android:paddingLeft="4dp"
+            android:paddingStart="4dp"
+            tools:ignore="RtlSymmetry">
 
             <!-- Weight field -->
             <EditText
                 android:id="@+id/edit_pet_weight"
+                style="@style/EditorFieldStyle"
                 android:hint="@string/hint_pet_weight"
                 android:inputType="number"
-                style="@style/EditorFieldStyle" />
+                tools:ignore="Autofill" />
 
             <!-- Units for weight (kg) -->
             <TextView
