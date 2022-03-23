@@ -211,26 +211,26 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                if (sign1 & sign2 & sign3) {
+                if (sign1 & sign3) {
                     // Save pet to database
                     insertPet();
                     // Exit activity
                     finish();
                     return true;
                 } else {
-                    Toast.makeText(this, "Please input something!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Can't save null.Please input something!", Toast.LENGTH_SHORT).show();
                     return false;
                 }
                 // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                if (sign1 & sign2 & sign3) {
+                if (sign1 || sign2 || sign3) {
                     mNameEditText.setText(null);
                     mBreedEditText.setText(null);
                     mWeightEditText.setText(null);
                     mGenderSpinner.setSelection(0);
                     return true;
                 } else {
-                    Toast.makeText(this, "Please input something!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Can't delete null.Please input something!", Toast.LENGTH_SHORT).show();
                     return false;
                 }
 

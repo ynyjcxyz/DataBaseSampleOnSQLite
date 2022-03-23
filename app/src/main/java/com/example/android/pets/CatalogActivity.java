@@ -16,6 +16,7 @@
 package com.example.android.pets;
 
 import android.annotation.SuppressLint;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -155,8 +156,8 @@ public class CatalogActivity extends AppCompatActivity {
         insertValues.put(PetEntry.COLUMN_PET_BREED, "Terrier_MIX");
         insertValues.put(PetEntry.COLUMN_PET_GENDER, PetEntry.GENDER_MALE);
         insertValues.put(PetEntry.COLUMN_PET_WEIGHT, 8);
-
         Uri insertUri = getContentResolver().insert(PetEntry.CONTENT_URI,insertValues);
+        Toast.makeText(this, "InserUri is: " + insertUri, Toast.LENGTH_SHORT).show();
 
         // Insert a new row for Toto in the database, returning the ID of that new row.
         // The first argument for db.insert() is the pets table name.
@@ -174,6 +175,9 @@ public class CatalogActivity extends AppCompatActivity {
     private void deleteTables() {
         //clear current table,caution!
 //        mDbHelper.getWritableDatabase().execSQL("delete from " + PetEntry.TABLE_NAME);
+        getContentResolver().delete(PetEntry.CONTENT_URI,null,null);
+//        getContentResolver().delete(PetEntry.CONTENT_URI,PetEntry.COLUMN_PET_NAME + "=?",new String[] {"Xijingping"} );
+        Toast.makeText(this,"Delete the table!",Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -195,8 +199,8 @@ public class CatalogActivity extends AppCompatActivity {
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-//                deleteTables();
-//                displayDatabaseInfo();
+                deleteTables();
+                displayDatabaseInfo();
                 return true;
         }
         return super.onOptionsItemSelected(item);
