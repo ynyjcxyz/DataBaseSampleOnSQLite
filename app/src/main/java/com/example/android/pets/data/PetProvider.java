@@ -8,29 +8,24 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+import com.example.android.pets.data.PetContract.PetEntry;
 
 public class PetProvider extends ContentProvider {
+    public static final String LOG_TAG = PetProvider.class.getSimpleName();
+    private PetDbHelper petDbHelper;
     private static final int PETS = 100;
     private static final int PET_ID = 101;
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-
     static {
         sUriMatcher.addURI(PetContract.CONTENT_AUTHORITY, PetContract.PATH_PETS, PETS);
         sUriMatcher.addURI(PetContract.CONTENT_AUTHORITY, PetContract.PATH_PETS + "/#", PET_ID);
     }
 
-    public static final String LOG_TAG = PetProvider.class.getSimpleName();
-    private PetDbHelper petDbHelper;
-
     @Override
     public boolean onCreate() {
-        // TODO: Create and initialize a PetDbHelper object to gain access to the pets database.
-        // Make sure the variable is a global variable, so it can be referenced from other
-        // ContentProvider methods.
-        petDbHelper = new PetDbHelper(this.getContext());
+        petDbHelper = new PetDbHelper(getContext());
         return true;
     }
-
     @Override
     public Cursor query(Uri uri,
                         String[] projection,
@@ -86,10 +81,7 @@ public class PetProvider extends ContentProvider {
         throw new IllegalArgumentException("Insertion is not support for " + uri);
     }
 
-    /**
-     * Insert a pet into the database with the given content values. Return the new content URI
-     * for that specific row in the database.
-     */
+
     private Uri insertPet(Uri uri, ContentValues values) {
         //check data valid or not
         checkInputData(values);
@@ -120,20 +112,11 @@ public class PetProvider extends ContentProvider {
         }
     }
 
-    /**
-     * Insert a pet into the database with the given content values. Return the new content URI
-     * for that specific row in the database.
-     */
-
     @Override
     public int delete(Uri uri,
                       String selection,
                       String[] selectionArgs) {
-        /**
-         * URI: content://com.example.android.pets/pets
-         * Selection: “breed=?”
-         * SelectionArgs: { “Calico” }
-        * */
+
         SQLiteDatabase database = petDbHelper.getWritableDatabase();
         int count;
         int match = sUriMatcher.match(uri);
@@ -157,12 +140,7 @@ public class PetProvider extends ContentProvider {
                       ContentValues contentValues,
                       String selection,
                       String[] selectionArgs) {
-        /**
-         * URI: content://com.example.android.pets/pets/
-         * ContentValues: name is Milo, breed is French bulldog, weight is 20
-         * Selection: “name=?”
-         * SelectionArgs: { “Toto” }
-        * */
+
         if (contentValues != null) {
             checkInputData(contentValues);
         } else {
