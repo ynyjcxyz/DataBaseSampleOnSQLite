@@ -1,6 +1,5 @@
 package com.example.android.pets;
 
-import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -10,16 +9,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.example.android.pets.data.PetContract.PetEntry;
 
 public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -34,16 +31,27 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         // Setup FAB to open EditorActivity
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
-            Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+            Intent intent = new Intent(this, EditorActivity.class);
+            intent.putExtra("FromFab", "Add a Pet");
             startActivity(intent);
         });
 
         ListView pet_list = findViewById(R.id.pet_list);
         View empty_view = findViewById(R.id.empty_view);
         pet_list.setEmptyView(empty_view);
+        cursorAdapter = new PetCursorAdapter(this, null);
+        pet_list.setAdapter(cursorAdapter);
 
-        PetCursorAdapter adapter = new PetCursorAdapter(this,null);
-        pet_list.setAdapter(adapter);
+        pet_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+                intent.putExtra("FromList","Edit Pet");
+                Uri uri = ContentUris.withAppendedId(PetEntry.CONTENT_URI,id);
+                intent.setData(uri);
+                startActivity(intent);
+            }
+        });
 
         //use loader to add data
         getLoaderManager().initLoader(PET_LOADER_ID, null, this);
@@ -103,12 +111,12 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         cursorAdapter.swapCursor(cursor);
     }
 
     @Override
-    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+    public void onLoaderReset(Loader<Cursor> loader) {
         cursorAdapter.swapCursor(null);
     }
 }

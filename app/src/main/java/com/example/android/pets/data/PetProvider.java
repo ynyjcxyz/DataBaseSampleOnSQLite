@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
-import com.example.android.pets.data.PetContract.PetEntry;
 
 public class PetProvider extends ContentProvider {
     public static final String LOG_TAG = PetProvider.class.getSimpleName();
@@ -62,6 +61,7 @@ public class PetProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
+        cursor.setNotificationUri(getContext().getContentResolver(),uri);
         return cursor;
     }
 
@@ -95,6 +95,7 @@ public class PetProvider extends ContentProvider {
             Log.e(LOG_TAG, "Failed to insert row for " + uri);
             return null;
         } else {
+            getContext().getContentResolver().notifyChange(uri,null);
             return ContentUris.withAppendedId(uri, id);
         }
     }
@@ -132,6 +133,9 @@ public class PetProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Cannot delete unknown URI: " + uri);
         }
+        if(count != 0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
         return count;
     }
 
@@ -165,6 +169,9 @@ public class PetProvider extends ContentProvider {
                         contentValues,
                         selection,
                         selectionArgs);
+        }
+        if(count != 0){
+            getContext().getContentResolver().notifyChange(uri, null);
         }
         return count;
     }
